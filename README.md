@@ -19,11 +19,12 @@ This utility provides the above limited functionality in a zero-configuration ma
 ### Grow setup
 
 1. Create an `extensions.txt` file within your pod.
-1. Add to the file: `git+git://github.com/grow/grow-ext-static-server`
-1. Run `grow install`.
-1. Add an `app.yaml` file to the project root:
+2. Add to the file: `git+git://github.com/grow/grow-ext-static-server`
+3. Run `grow install`.
+4. Add an `app.yaml` file to the project root:
 
 ```yaml
+# app.yaml
 runtime: python37
 entrypoint: gunicorn -b :8080 -w 2 extensions.grow_static_server.main:app
 
@@ -32,3 +33,14 @@ handlers:
   script: auto
   secure: always
 ```
+
+5. (Optional) Add redirects, either via `redirects.py` or `redirects.yaml` in the project root:
+
+```yaml
+# redirects.yaml
+- ['/vanity-url', '/some-much-longer-destination-url']
+- ['/test', 'https://example.com/']
+- ['/test/:foo', 'https://example.com/$foo']
+```
+
+6. Deploy the application. See [Makefile](test/Makefile) for example deployment commands.
