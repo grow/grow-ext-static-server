@@ -1,0 +1,6 @@
+root: /
+localization:
+  default_locale: en
+  locales:
+  - en
+  - ja

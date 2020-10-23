@@ -1,9 +1,10 @@
+from . import routetrie
 import logging
-import routetrie
+import os
 import urllib
 import webob
+import yaml
 
-# TODO: Import redirects.
 
 class RedirectMiddleware(object):
 
@@ -20,6 +21,18 @@ class RedirectMiddleware(object):
       logging.exception('middleware exception: ')
       response = self.handle_error(request)
     return response(environ, start_response)
+
+  def _configure_redirects(self):
+    pod_root_path = os.path.join(os.path.dirname(__file__), '..', '..')
+    yaml_path = os.path.abspath(os.path.join(pod_root_path, 'redirects.yaml'))
+    py_path = os.path.abspath(os.path.join(pod_root_path, 'redirects.py'))
+    if os.path.exists(yaml_path):
+      redirects = yaml.load(open(yaml_path))
+      return redirects
+    elif os.path.exists(py_path):
+      return {}
+    else:
+      return {}
 
   def handle_request(self, request):
     # Seeing a lot of requests for /%FF for some reason, which errors when
@@ -67,7 +80,8 @@ class RedirectMiddleware(object):
 
   def init_redirects(self):
     """Initializes the redirects trie."""
-    for path, url in REDIRECTS:
+    for parts in self._configure_redirects():
+      path, url = parts
       self.redirects.add(path, url)
 
   def get_redirect_url(self, path):

@@ -1,14 +1,14 @@
 """Main entrypoint for web server application."""
 
-from locale_redirect_middleware import LocaleRedirectMiddleware
-from redirect_middleware import RedirectMiddleware
+from .locale_redirect_middleware import LocaleRedirectMiddleware
+from .redirect_middleware import RedirectMiddleware
 import logging
 import mimetypes
 import os
 import webapp2
 import yaml
 
-podspec_path = os.path.join(os.path.dirname(__file__), '..', '..', 'podspec.yaml')
+podspec_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'podspec.yaml'))
 podspec = yaml.safe_load(open(podspec_path, encoding='utf-8'))
 default_locale = podspec.get('localization', {}).get('default_locale', 'en')
 www_root = './build' + podspec.get('root', '/')
