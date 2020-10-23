@@ -6,14 +6,13 @@ A zero configuration, localization-aware static server that supports redirects d
 
 ## Concept
 
-Many websites display the "Get on Google Play" and "Download on the App Store"
-badge images, advertising a mobile app download. This extension simplifies usage
-by exposing the correct localized badge image via a YAML configuration file.
+Many static websites require limited dynamic functionality such as:
 
-The images are included in SVG form with a tightly-cropped view box from:
+- Vanity URL redirects
+- Trailing slash normalization
+- Localization (via redirects or rewriting responses)
 
-- [App Store Brand Guidelines](https://developer.apple.com/app-store/marketing/guidelines/#section-badges)
-- [Google Play Badge Generator](https://play.google.com/intl/en_us/badges/)
+This utility provides the above limited functionality in a zero-configuration manner, compatible with the `podspec.yaml` syntax for Grow websites and an additional redirect configuration file.
 
 ## Usage
 
