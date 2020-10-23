@@ -21,7 +21,15 @@ This utility provides the above limited functionality in a zero-configuration ma
 1. Create an `extensions.txt` file within your pod.
 2. Add to the file: `git+git://github.com/grow/grow-ext-static-server`
 3. Run `grow install`.
-4. Add an `app.yaml` file to the project root:
+4. Add `requirements.txt` to the project root:
+
+```txt
+gunicorn
+webapp2==3.0.0b1
+pyyaml
+```
+
+5. Add an `app.yaml` file to the project root:
 
 ```yaml
 # app.yaml
@@ -34,7 +42,9 @@ handlers:
   secure: always
 ```
 
-5. (Optional) Add redirects, either via `redirects.py` or `redirects.yaml` in the project root:
+### Configure and deploy
+
+6. Optionally add redirects, either via `redirects.py` or `redirects.yaml` in the project root:
 
 ```yaml
 # redirects.yaml
