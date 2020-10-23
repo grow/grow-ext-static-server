@@ -27,7 +27,7 @@ class RedirectMiddleware(object):
     yaml_path = os.path.abspath(os.path.join(pod_root_path, 'redirects.yaml'))
     py_path = os.path.abspath(os.path.join(pod_root_path, 'redirects.py'))
     if os.path.exists(yaml_path):
-      redirects = yaml.load(open(yaml_path))
+      redirects = yaml.safe_load(open(yaml_path))
       return redirects
     elif os.path.exists(py_path):
       return {}

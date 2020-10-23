@@ -8,10 +8,11 @@ import os
 import webapp2
 import yaml
 
-podspec_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'podspec.yaml'))
+pod_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+podspec_path = os.path.abspath(os.path.join(pod_root_path, 'podspec.yaml'))
 podspec = yaml.safe_load(open(podspec_path, encoding='utf-8'))
 default_locale = podspec.get('localization', {}).get('default_locale', 'en')
-www_root = './build' + podspec.get('root', '/')
+www_root = os.path.abspath(os.path.join(pod_root_path, 'build')) + podspec.get('root', '/')
 pod_root = podspec.get('root', '/')
 locales = podspec.get('localization', {}).get('locales', [])
 
@@ -27,7 +28,7 @@ class StaticHandler(webapp2.RequestHandler):
 
   def get(self, path=''):
     path = path.lstrip('/')
-    path = os.path.join(os.path.dirname(__file__), 'build', path)
+    path = os.path.join(pod_root_path, 'build', path)
 
     if os.path.isdir(path):
       path = path.rstrip('/') + '/index.html'
