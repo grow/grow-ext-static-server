@@ -34,7 +34,7 @@ pyyaml
 ```yaml
 # app.yaml
 runtime: python37
-entrypoint: gunicorn -b :8080 -w 2 extensions.grow_static_server.main:app
+entrypoint: gunicorn -b :$PORT -w 2 extensions.grow_static_server.main:app
 
 handlers:
 - url: (.*)
@@ -42,9 +42,17 @@ handlers:
   secure: always
 ```
 
+6. Add a `.gcloudignore` file to the project root:
+
+```
+Pipfile
+Pipfile.lock
+node_modules
+```
+
 ### Configure and deploy
 
-6. Optionally add redirects, either via `redirects.py` or `redirects.yaml` in the project root:
+7. Optionally add redirects, either via `redirects.py` or `redirects.yaml` in the project root:
 
 ```yaml
 # redirects.yaml
@@ -53,4 +61,4 @@ handlers:
 - ['/test/:foo', 'https://example.com/$foo']
 ```
 
-6. Deploy the application. See [Makefile](test/Makefile) for example deployment commands.
+8. Deploy the application. See [Makefile](test/Makefile) for example deployment commands.

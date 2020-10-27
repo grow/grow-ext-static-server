@@ -1,5 +1,5 @@
 runtime: python37
-entrypoint: gunicorn -b :8080 extensions.grow_static_server.main:app
+entrypoint: gunicorn -b :$PORT extensions.grow_static_server.main:app
 
 handlers:
 - url: (.*)
