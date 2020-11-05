@@ -51,7 +51,7 @@ class RedirectMiddleware(object):
           params = urlparse.parse_qs(parts.query)
           params.update(urlparse.parse_qs(request.query_string))
           qsl = []
-          for key, vals in params.iteritems():
+          for key, vals in params.items():
             for val in vals:
               qsl.append((key, val))
           redirect_uri = '{}?{}'.format(parts.path, urllib.urlencode(qsl))
@@ -92,7 +92,7 @@ class RedirectMiddleware(object):
 
     # Replace `$variable` placeholders in the URL.
     if '$' in url:
-      for key, value in params.iteritems():
+      for key, value in params.items():
         if key.startswith(':') or key.startswith('*'):
           url = url.replace('$' + key[1:], value)
     return url

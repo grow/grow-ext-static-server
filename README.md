@@ -45,9 +45,10 @@ handlers:
 6. Add a `.gcloudignore` file to the project root:
 
 ```
-Pipfile
-Pipfile.lock
-node_modules
+*
+!/build/
+!/extensions/
+!/podspec.yaml
 ```
 
 ### Configure and deploy
