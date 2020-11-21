@@ -25,8 +25,8 @@ This utility provides the above limited functionality in a zero-configuration ma
 
 ```txt
 gunicorn
-webapp2==3.0.0b1
 pyyaml
+webapp2==3.0.0b1
 ```
 
 5. Add an `app.yaml` file to the project root:
@@ -46,9 +46,13 @@ handlers:
 
 ```
 *
-!/build/
-!/extensions/
+!/build/**
+!/extensions/**
 !/podspec.yaml
+!/redirects.py
+!/redirects.yaml
+!/requirements.txt
+!.
 ```
 
 ### Configure and deploy
