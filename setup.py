@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='grow-ext-static-server',
-    version='1.0.0',
+    version='1.1.0',
     license='MIT',
     author='Grow SDK Authors',
     author_email='hello@grow.io',

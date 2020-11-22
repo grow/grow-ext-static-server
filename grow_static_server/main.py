@@ -16,9 +16,9 @@ www_root = os.path.abspath(os.path.join(pod_root_path, 'build')) + podspec.get('
 pod_root = podspec.get('root', '/')
 locales = podspec.get('localization', {}).get('locales', [])
 
-# Whether to rewrite root URLs with localized content, resulting in
-# fallback for localized content. Ensure requests are not cached.
-rewrite_content = True
+redirect_config = RedirectMiddleware.get_config()
+trailing_slash_behavior = redirect_config.get('settings', {}).get('trailing_slash_behavior', 'add')
+rewrite_content = redirect_config.get('settings', {}).get('rewrite_localized_content', True)
 
 mimetypes.add_type('text/template', '.mustache')
 
@@ -51,29 +51,45 @@ class TrailingSlashRedirect(object):
     def __init__(self, app):
         self.app = app
 
+    def redirect(self, environ, start_response, path):
+      query_string = environ.get('QUERY_STRING', '')
+      if query_string:
+        destination = path + '?' + query_string
+      else:
+        destination = path
+      status = '302 Found'
+      response_headers = [('Location', destination)]
+      start_response(status, response_headers)
+      return []
+
     def __call__(self, environ, start_response):
         path = environ['PATH_INFO']
         base, ext = os.path.splitext(os.path.basename(path))
 
         # /index.html -> / redirect.
-        if path.endswith('/index.html'):
-            path = path[:-11]
-            path = '/{}'.format(path)
-            status = '302 Found'
-            response_headers = [('Location', path)]
-            start_response(status, response_headers)
-            return []
+        if trailing_slash_behavior in ['remove', 'add']:
+          if path.endswith('/index.html'):
+              if trailing_slash_behavior == 'remove':
+                path = path[:-11]
+              elif trailing_slash_behavior == 'add':
+                path = path[:-10]
+              return self.redirect(environ, start_response, path)
 
+        # Strip trailing slashes.
+        # /foo/ -> /foo redirect.
+        if trailing_slash_behavior == 'remove':
+          if path.endswith('/') and len(path) > 1:
+              path = path[:-1]
+              return self.redirect(environ, start_response, path)
+
+        # Enforce trailing slashes (default).
         # /foo -> /foo/ redirect.
-        if base and not ext:
-            path = '{}/'.format(path)
-            status = '302 Found'
-            response_headers = [('Location', path)]
-            start_response(status, response_headers)
-            return []
+        if trailing_slash_behavior == 'add':
+          if base and not ext:
+              path = '{}/'.format(path)
+              return self.redirect(environ, start_response, path)
 
         return self.app(environ, start_response)
-
 
 
 def app(_, request):

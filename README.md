@@ -44,7 +44,7 @@ handlers:
 
 6. Add a `.gcloudignore` file to the project root:
 
-```
+```txt
 *
 !/build/**
 !/extensions/**
@@ -57,13 +57,19 @@ handlers:
 
 ### Configure and deploy
 
-7. Optionally add redirects, either via `redirects.py` or `redirects.yaml` in the project root:
+7. Optionally add redirects, via `redirects.yaml` in the project root:
 
 ```yaml
 # redirects.yaml
+
+redirects:
 - ['/vanity-url', '/some-much-longer-destination-url']
 - ['/test', 'https://example.com/']
 - ['/test/:foo', 'https://example.com/$foo']
+
+settings:
+  rewrite_localized_content: true  # Either true (default) or false.
+  trailing_slash_behavior: add  # Either 'add' (default) or 'remove'.
 ```
 
 8. Deploy the application. See [Makefile](test/Makefile) for example deployment commands.

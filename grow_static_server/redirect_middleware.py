@@ -1,7 +1,7 @@
 from . import routetrie
 import logging
 import os
-import urllib
+import urllib.parse
 import webob
 import yaml
 
@@ -22,17 +22,21 @@ class RedirectMiddleware(object):
       response = self.handle_error(request)
     return response(environ, start_response)
 
-  def _configure_redirects(self):
+  @classmethod
+  def get_redirects(cls):
+    config = cls.get_config()
+    return config.get('redirects', [])
+
+  @classmethod
+  def get_config(cls):
     pod_root_path = os.path.join(os.path.dirname(__file__), '..', '..')
     yaml_path = os.path.abspath(os.path.join(pod_root_path, 'redirects.yaml'))
-    py_path = os.path.abspath(os.path.join(pod_root_path, 'redirects.py'))
     if os.path.exists(yaml_path):
-      redirects = yaml.safe_load(open(yaml_path))
-      return redirects
-    elif os.path.exists(py_path):
-      return {}
-    else:
-      return {}
+      config = yaml.safe_load(open(yaml_path))
+      if isinstance(config, list):
+        return {'redirects': config}
+      return config
+    return {}
 
   def handle_request(self, request):
     # Seeing a lot of requests for /%FF for some reason, which errors when
@@ -41,20 +45,20 @@ class RedirectMiddleware(object):
     if path_info.lower() == r'/%ff':
       return self.redirect('/')
 
-    # Check for redirects in data/redirects.txt file.
+    # Handle user-supplied redirects.
     redirect_uri = self.get_redirect_url(request.path)
     if redirect_uri:
       # Preserve query string for relative paths.
       if redirect_uri.startswith('/') and request.query_string:
         if '?' in redirect_uri:
-          parts = urlparse.urlparse(redirect_uri)
-          params = urlparse.parse_qs(parts.query)
-          params.update(urlparse.parse_qs(request.query_string))
+          parts = urllib.parse.urlparse(redirect_uri)
+          params = urllib.parse.parse_qs(parts.query)
+          params.update(urllib.parse.parse_qs(request.query_string))
           qsl = []
           for key, vals in params.items():
             for val in vals:
               qsl.append((key, val))
-          redirect_uri = '{}?{}'.format(parts.path, urllib.urlencode(qsl))
+          redirect_uri = '{}?{}'.format(parts.path, urllib.parse.urlencode(qsl))
         else:
           redirect_uri = '{}?{}'.format(redirect_uri, request.query_string)
 
@@ -80,7 +84,7 @@ class RedirectMiddleware(object):
 
   def init_redirects(self):
     """Initializes the redirects trie."""
-    for parts in self._configure_redirects():
+    for parts in self.get_redirects():
       path, url = parts
       self.redirects.add(path, url)
 
