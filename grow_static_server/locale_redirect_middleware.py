@@ -6,6 +6,9 @@ REDIRECTED_COOKIE = 'Grow-Static-Server-Locale-Redirected'
 LOCALE_RESPONSE_HEADER = 'Grow-Static-Server-Locale'
 TERRITORY_RESPONSE_HEADER = 'Grow-Static-Server-Territory'
 
+LANGUAGE_PARAM = 'Grow-Static-Server-Language'
+TERRITORY_PARAM = 'Grow-Static-Server-Territory'
+
 
 class LocaleRedirectMiddleware(object):
 
@@ -52,7 +55,6 @@ class LocaleRedirectMiddleware(object):
         query_string = environ.get('QUERY_STRING', '')
         locale_part = url_path.split('/', 1)[0]
         locale_from_url = None
-        territory_from_url = None
 
         session_cookie = SimpleCookie(os.getenv('HTTP_COOKIE', ''))
         has_redirected = REDIRECTED_COOKIE in session_cookie

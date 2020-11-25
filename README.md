@@ -68,6 +68,7 @@ redirects:
 - ['/test/:foo', 'https://example.com/$foo']
 
 settings:
+  custom_404_page: 404.html  # Path in 'build/' folder for custom 404 page.
   rewrite_localized_content: true  # Either true (default) or false.
   trailing_slash_behavior: add  # Either 'add' (default) or 'remove'.
 ```

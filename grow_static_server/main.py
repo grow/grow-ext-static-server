@@ -19,6 +19,7 @@ locales = podspec.get('localization', {}).get('locales', [])
 redirect_config = RedirectMiddleware.get_config()
 trailing_slash_behavior = redirect_config.get('settings', {}).get('trailing_slash_behavior', 'add')
 rewrite_content = redirect_config.get('settings', {}).get('rewrite_localized_content', True)
+custom_404_page = redirect_config.get('settings', {}).get('custom_404_page')
 
 mimetypes.add_type('text/template', '.mustache')
 
@@ -26,7 +27,7 @@ mimetypes.add_type('text/template', '.mustache')
 class StaticHandler(webapp2.RequestHandler):
   """Abstract class to handle serving static files."""
 
-  def get(self, path=''):
+  def get(self, path='', status_code=None):
     path = path.lstrip('/')
     path = os.path.join(pod_root_path, 'build', path)
 
@@ -36,7 +37,13 @@ class StaticHandler(webapp2.RequestHandler):
     logging.info('Serving -> {}'.format(path))
 
     if not os.path.isfile(path):
-      webapp2.abort(404)
+      if custom_404_page:
+        return self.get(custom_404_page, status_code=404)
+      else:
+        webapp2.abort(404)
+
+    if status_code is not None:
+      self.response.set_status(status_code)
 
     mimetype = mimetypes.guess_type(path)[0] or 'text/plain'
     self.response.headers['Content-Type'] = mimetype

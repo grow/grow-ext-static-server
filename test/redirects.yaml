@@ -7,3 +7,4 @@ redirects:
 settings:
   trailing_slash_behavior: add
   rewrite_localized_content: True
+  custom_404_page: 404.html
