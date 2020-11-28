@@ -45,12 +45,23 @@ class StaticHandler(webapp2.RequestHandler):
     if status_code is not None:
       self.response.set_status(status_code)
 
-    mimetype = mimetypes.guess_type(path)[0] or 'text/plain'
-    self.response.headers['Content-Type'] = mimetype
     fp = open(path, 'rb')
+    fd = os.open(path, os.O_RDWR|os.O_CREAT)
+    info = os.fstat(fd)
+    etag = '"{}{}{}"'.format(info.st_mtime, info.st_size, info.st_ino)
+    request_etag = self.request.headers.get('If-None-Match')
+    if etag == request_etag:
+        self.response.status = 304
+        return
+    self.response.headers['ETag'] = etag
+    self.response.headers['Content-Type'] = mimetypes.guess_type(path)[0] or 'text/plain'
+
     # Bypass the subclass's `write` method due to Python 3 incompatibility.
     # https://github.com/GoogleCloudPlatform/webapp2/issues/146
     super(webapp2.Response, self.response).write(fp.read())
+
+    fp.close()
+    os.close(fd)
 
 
 class TrailingSlashRedirect(object):
