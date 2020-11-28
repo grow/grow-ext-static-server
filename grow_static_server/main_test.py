@@ -4,6 +4,7 @@ path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'test'))
 os.environ['GROW_STATIC_SERVER_POD_ROOT'] = path
 
 from .main import app
+from .main import StaticHandler
 import unittest
 import webtest
 
@@ -18,7 +19,8 @@ class TestEndpoints(unittest.TestCase):
         # Test root.
         resp = self.app.get('/')
         self.assertEqual(200, resp.status_int)
-        self.assertEqual('"1603473278622118778"', resp.headers['ETag'])
+        etag = StaticHandler.get_etag('test/build/index.html')
+        self.assertEqual(etag, resp.headers['ETag'])
         self.assertIn('Hello World', resp.body.decode())
 
         # Test 404.

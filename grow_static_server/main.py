@@ -28,6 +28,17 @@ mimetypes.add_type('text/template', '.mustache')
 class StaticHandler(webapp2.RequestHandler):
   """Abstract class to handle serving static files."""
 
+  @classmethod
+  def get_etag(cls, path):
+    fd = os.open(path, os.O_RDONLY)
+    info = os.fstat(fd)
+    mtime = str(info.st_mtime).split('.')[0]
+    size = str(info.st_size).split('.')[0]
+    ino = str(info.st_ino).split('.')[0]
+    etag = '"{}{}{}"'.format(mtime, size, ino)
+    os.close(fd)
+    return etag
+
   def get(self, path='', status_code=None):
     path = path.lstrip('/')
     path = os.path.join(pod_root_path, 'build', path)
@@ -47,12 +58,7 @@ class StaticHandler(webapp2.RequestHandler):
       self.response.set_status(status_code)
 
     fp = open(path, 'rb')
-    fd = os.open(path, os.O_RDWR|os.O_CREAT)
-    info = os.fstat(fd)
-    mtime = str(info.st_mtime).split('.')[0]
-    size = str(info.st_size).split('.')[0]
-    ino = str(info.st_ino).split('.')[0]
-    etag = '"{}{}{}"'.format(mtime, size, ino)
+    etag = StaticHandler.get_etag(path)
     request_etag = self.request.headers.get('If-None-Match')
     if etag == request_etag:
         self.response.status = 304
@@ -65,7 +71,6 @@ class StaticHandler(webapp2.RequestHandler):
     super(webapp2.Response, self.response).write(fp.read())
 
     fp.close()
-    os.close(fd)
 
 
 class TrailingSlashRedirect(object):
