@@ -9,6 +9,7 @@ import webapp2
 import yaml
 
 pod_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+pod_root_path = os.getenv('GROW_STATIC_SERVER_POD_ROOT') or pod_root_path
 podspec_path = os.path.abspath(os.path.join(pod_root_path, 'podspec.yaml'))
 podspec = yaml.safe_load(open(podspec_path, encoding='utf-8'))
 default_locale = podspec.get('localization', {}).get('default_locale', 'en')

@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+WebOb = "*"
+pyyaml = "*"
+webapp2 = "==3.0.0b1"
+
+[dev-packages]
+WebTest = "==2.0.35"
+
+[requires]
+python_version = "3.8.6"

@@ -1,0 +1,24 @@
+name: 'Run tests'
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8.6
+      - name: Install pipenv
+        uses: dschep/install-pipenv-action@v1
+      - name: Run tests
+        run: |
+          make install
+          make test
+          pipenv install gunicorn
+          pipenv run gunicorn -b :9999 -w 2 main:app
+          sleep 1s
+          curl http://localhost:9999/
+          pkill -f gunicorn
