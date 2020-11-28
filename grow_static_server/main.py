@@ -49,7 +49,10 @@ class StaticHandler(webapp2.RequestHandler):
     fp = open(path, 'rb')
     fd = os.open(path, os.O_RDWR|os.O_CREAT)
     info = os.fstat(fd)
-    etag = '"{}{}{}"'.format(info.st_mtime, info.st_size, info.st_ino)
+    mtime = str(info.st_mtime).split('.')[0]
+    size = str(info.st_size).split('.')[0]
+    ino = str(info.st_ino).split('.')[0]
+    etag = '"{}{}{}"'.format(mtime, size, ino)
     request_etag = self.request.headers.get('If-None-Match')
     if etag == request_etag:
         self.response.status = 304

@@ -18,6 +18,7 @@ class TestEndpoints(unittest.TestCase):
         # Test root.
         resp = self.app.get('/')
         self.assertEqual(200, resp.status_int)
+        self.assertEqual('"1603473278622118778"', resp.headers['ETag'])
         self.assertIn('Hello World', resp.body.decode())
 
         # Test 404.
