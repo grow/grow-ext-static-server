@@ -23,6 +23,9 @@ class TestEndpoints(unittest.TestCase):
         self.assertEqual(etag, resp.headers['ETag'])
         self.assertIn('Hello World', resp.body.decode())
 
+        resp = self.app.get('/', headers={'If-None-Match': etag})
+        self.assertEqual(304, resp.status_int)
+
         # Test 404.
         resp = self.app.get('/does-not-exist/', status=404)
         self.assertEqual(404, resp.status_int)

@@ -11,7 +11,8 @@ import yaml
 pod_root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 pod_root_path = os.getenv('GROW_STATIC_SERVER_POD_ROOT') or pod_root_path
 podspec_path = os.path.abspath(os.path.join(pod_root_path, 'podspec.yaml'))
-podspec = yaml.safe_load(open(podspec_path, encoding='utf-8'))
+with open(podspec_path, encoding='utf-8') as fp:
+  podspec = yaml.safe_load(fp.read())
 default_locale = podspec.get('localization', {}).get('default_locale', 'en')
 www_root = os.path.abspath(os.path.join(pod_root_path, 'build')) + podspec.get('root', '/')
 pod_root = podspec.get('root', '/')
@@ -57,20 +58,20 @@ class StaticHandler(webapp2.RequestHandler):
     if status_code is not None:
       self.response.set_status(status_code)
 
-    fp = open(path, 'rb')
-    etag = StaticHandler.get_etag(path)
-    request_etag = self.request.headers.get('If-None-Match')
-    if etag == request_etag:
-        self.response.status = 304
-        return
-    self.response.headers['ETag'] = etag
-    self.response.headers['Content-Type'] = mimetypes.guess_type(path)[0] or 'text/plain'
+    with open(path, 'rb') as fp:
+      etag = StaticHandler.get_etag(path)
+      weak_etag = 'W/{}'.format(etag)
+      request_etag = self.request.headers.get('If-None-Match')
+      if request_etag in [etag, weak_etag]:
+          self.response.status = 304
+          return
 
-    # Bypass the subclass's `write` method due to Python 3 incompatibility.
-    # https://github.com/GoogleCloudPlatform/webapp2/issues/146
-    super(webapp2.Response, self.response).write(fp.read())
+      self.response.headers['ETag'] = str(etag)
+      self.response.headers['Content-Type'] = mimetypes.guess_type(path)[0] or 'text/plain'
 
-    fp.close()
+      # Bypass the subclass's `write` method due to Python 3 incompatibility.
+      # https://github.com/GoogleCloudPlatform/webapp2/issues/146
+      super(webapp2.Response, self.response).write(fp.read())
 
 
 class TrailingSlashRedirect(object):
