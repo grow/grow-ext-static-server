@@ -9,6 +9,7 @@ pyyaml = "*"
 webapp2 = "==3.0.0b1"
 
 [dev-packages]
+gunicorn = "*"
 WebTest = "==2.0.35"
 
 [requires]

@@ -17,8 +17,4 @@ jobs:
         run: |
           make install
           make test
-          pipenv install gunicorn
-          pipenv run gunicorn -b :9999 -w 2 main:app
-          sleep 1s
-          curl http://localhost:9999/
-          pkill -f gunicorn
+          make curl-test
