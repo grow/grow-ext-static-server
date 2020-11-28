@@ -1,6 +1,6 @@
 # grow-ext-static-server
 
-[![Build Status](https://travis-ci.org/grow/grow-ext-static-server.svg?branch=master)](https://travis-ci.org/grow/grow-ext-static-server)
+![Master](https://github.com/grow/grow-ext-static-server/workflows/Run%20tests/badge.svg)
 
 A zero configuration, localization-aware static server that supports redirects designed to be used with Google App Engine.
 

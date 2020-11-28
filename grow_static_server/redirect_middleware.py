@@ -6,6 +6,10 @@ import webob
 import yaml
 
 
+pod_root_path = os.getenv('GROW_STATIC_SERVER_POD_ROOT') \
+    or os.path.join(os.path.dirname(__file__), '..', '..')
+
+
 class RedirectMiddleware(object):
 
   def __init__(self, app):
@@ -29,10 +33,10 @@ class RedirectMiddleware(object):
 
   @classmethod
   def get_config(cls):
-    pod_root_path = os.path.join(os.path.dirname(__file__), '..', '..')
     yaml_path = os.path.abspath(os.path.join(pod_root_path, 'redirects.yaml'))
     if os.path.exists(yaml_path):
-      config = yaml.safe_load(open(yaml_path))
+      with open(yaml_path) as fp:
+        config = yaml.safe_load(fp.read())
       if isinstance(config, list):
         return {'redirects': config}
       return config

@@ -1,0 +1,20 @@
+name: 'Run tests'
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8.6
+      - name: Install pipenv
+        uses: dschep/install-pipenv-action@v1
+      - name: Run tests
+        run: |
+          make install
+          make test
+          make curl-test
