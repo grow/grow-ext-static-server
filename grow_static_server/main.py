@@ -5,6 +5,7 @@ from .redirect_middleware import RedirectMiddleware
 import logging
 import mimetypes
 import os
+import shutil
 import webapp2
 import yaml
 
@@ -25,6 +26,7 @@ custom_404_page = redirect_config.get('settings', {}).get('custom_404_page')
 localization = redirect_config.get('settings', {}).get('localization', {})
 
 mimetypes.add_type('text/template', '.mustache')
+mimetypes.add_type('application/xml', '.xml')
 
 
 class StaticHandler(webapp2.RequestHandler):
@@ -65,14 +67,15 @@ class StaticHandler(webapp2.RequestHandler):
       request_etag = self.request.headers.get('If-None-Match')
       if request_etag in [etag, weak_etag]:
           self.response.status = 304
+          del self.response.headers['Content-Type']
           return
-
       self.response.headers['ETag'] = str(etag)
       self.response.headers['Content-Type'] = mimetypes.guess_type(path)[0] or 'text/plain'
-
       # Bypass the subclass's `write` method due to Python 3 incompatibility.
       # https://github.com/GoogleCloudPlatform/webapp2/issues/146
       super(webapp2.Response, self.response).write(fp.read())
+      # TODO: webapp2 doesn't support streaming responses.
+      # shutil.copyfileobj(fp, self.response)
 
 
 class TrailingSlashRedirect(object):
