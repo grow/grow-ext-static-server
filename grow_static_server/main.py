@@ -14,14 +14,15 @@ podspec_path = os.path.abspath(os.path.join(pod_root_path, 'podspec.yaml'))
 with open(podspec_path, encoding='utf-8') as fp:
   podspec = yaml.safe_load(fp.read())
 default_locale = podspec.get('localization', {}).get('default_locale', 'en')
-www_root = os.path.abspath(os.path.join(pod_root_path, 'build')) + podspec.get('root', '/')
+www_root = os.path.abspath(os.path.join(pod_root_path, 'build'))
 pod_root = podspec.get('root', '/')
 locales = podspec.get('localization', {}).get('locales', [])
 
 redirect_config = RedirectMiddleware.get_config()
 trailing_slash_behavior = redirect_config.get('settings', {}).get('trailing_slash_behavior', 'add')
-rewrite_content = redirect_config.get('settings', {}).get('rewrite_localized_content', True)
+rewrite_content = redirect_config.get('settings', {}).get('rewrite_localized_content', False)
 custom_404_page = redirect_config.get('settings', {}).get('custom_404_page')
+localization = redirect_config.get('settings', {}).get('localization', {})
 
 mimetypes.add_type('text/template', '.mustache')
 
@@ -127,7 +128,8 @@ def app(_, request):
   local_app = LocaleRedirectMiddleware(
 	local_app, www_root=www_root, pod_root=pod_root,
         locales=locales, default_locale=default_locale,
-        rewrite_content=rewrite_content)
+        rewrite_content=rewrite_content,
+        countries_to_locales=localization.get('countries_to_locales'))
   local_app = TrailingSlashRedirect(local_app)
   local_app = RedirectMiddleware(local_app)
   return local_app(_, request)

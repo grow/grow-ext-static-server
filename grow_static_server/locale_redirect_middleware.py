@@ -9,16 +9,22 @@ TERRITORY_RESPONSE_HEADER = 'Grow-Static-Server-Territory'
 LANGUAGE_PARAM = 'Grow-Static-Server-Language'
 TERRITORY_PARAM = 'Grow-Static-Server-Territory'
 
+logging.getLogger().setLevel(logging.DEBUG)
+
+
 
 class LocaleRedirectMiddleware(object):
 
     def __init__(self, app, www_root, pod_root, locales=None,
-                 default_locale=None, rewrite_content=False):
+                 default_locale=None, rewrite_content=False,
+                 locale_part_prefix='intl/', countries_to_locales=None):
         self.app = app
         self.www_root = www_root
         self.pod_root = pod_root
+        self.locale_part_prefix = locale_part_prefix
         self.default_locale = default_locale
         self.rewrite_content = rewrite_content
+        self.countries_to_locales = countries_to_locales
         if self.default_locale:
             self.default_locale = self.default_locale.lower()
         self.locales = locales or []
@@ -53,7 +59,7 @@ class LocaleRedirectMiddleware(object):
         # the locale, set the cookie, and redirect.
         url_path = environ['PATH_INFO'].lstrip('/')
         query_string = environ.get('QUERY_STRING', '')
-        locale_part = url_path.split('/', 1)[0]
+        locale_part = url_path.replace(self.locale_part_prefix, '').split('/', 1)[0]  # TODO: Add custom parsing behavior.
         locale_from_url = None
 
         session_cookie = SimpleCookie(os.getenv('HTTP_COOKIE', ''))
@@ -82,9 +88,8 @@ class LocaleRedirectMiddleware(object):
                 self.territories_to_identifiers.get(territory_from_header, '')
         locale_from_header = locale_from_header.lower()
 
-        # NOTE: Only language is considered currently, not the full locale
-        # identifier.
-        locale_from_header = language_from_header
+        if self.countries_to_locales:
+            locale_from_header = self.countries_to_locales.get(locale_from_header, locale_from_header)
 
         def locale_start_response(status, headers, exc_info=None):
             headers.append((LOCALE_RESPONSE_HEADER, locale_from_header))
@@ -101,7 +106,8 @@ class LocaleRedirectMiddleware(object):
             url_path = url_path.replace(self.pod_root.lstrip('/'), '')
             url_path = url_path.lstrip('/')
             localized_path_on_disk = os.path.join(
-                    self.www_root, locale_from_header, url_path)
+                    self.www_root, self.locale_part_prefix, locale_from_header,
+                    self.pod_root.lstrip('/'), url_path)
             localized_path_on_disk = localized_path_on_disk.replace('//', '/')
 
         # Rewrite the content with the localized content.
@@ -114,9 +120,9 @@ class LocaleRedirectMiddleware(object):
             return [content]
 
         # Redirect the user if we have a localized file.
-        if locale_from_header and os.path.exists(localized_path_on_disk):
-            localized_path_on_disk = localized_path_on_disk.replace('./build/', './')
-            url = localized_path_on_disk.replace('/index.html', '/')
+        if locale_from_header and localized_path_on_disk and os.path.exists(localized_path_on_disk):
+            url = localized_path_on_disk.replace(self.www_root, '/')
+            url = url.replace('/index.html', '/')
             return self.redirect(locale_start_response, url)
 
         # If no file is found at the current location, and if we have a file at

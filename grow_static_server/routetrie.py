@@ -6,13 +6,15 @@ class RouteTrie(object):
         self.param_child = None
         self.wildcard_child = None
         self.value = None
+        self.permanent = False
 
-    def add(self, route, value):
+    def add(self, route, value, permanent=False):
         route = self._normalize_route(route)
 
         # If the end was reached, save the value to the node.
         if route == '':
             self.value = value
+            self.permanent = permanent
             return
 
         head, tail = self._split_route(route)
@@ -31,7 +33,7 @@ class RouteTrie(object):
             if next_node is None:
                 next_node = RouteTrie()
                 self.children[head] = next_node
-        next_node.add(tail, value)
+        next_node.add(tail, value, permanent=permanent)
 
     def get(self, route):
         params = {}
@@ -82,6 +84,7 @@ class ParamChild(object):
 
 
 class WildcardChild(object):
-    def __init__(self, name, value):
+    def __init__(self, name, value, permanent=False):
         self.name = name
         self.value = value
+        self.permanent = permanent
