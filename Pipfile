@@ -13,4 +13,4 @@ gunicorn = "*"
 WebTest = "==2.0.35"
 
 [requires]
-python_version = "3.8.6"
+python_version = "3"

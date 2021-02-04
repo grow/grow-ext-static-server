@@ -10,7 +10,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8.6
+          python-version: 3.9.1
       - name: Install pipenv
         uses: dschep/install-pipenv-action@v1
       - name: Run tests
