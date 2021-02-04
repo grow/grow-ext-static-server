@@ -37,34 +37,34 @@ class RouteTrie(object):
 
     def get(self, route):
         params = {}
-        value = self._get_value(route, params)
-        return value, params
+        value, permanent = self._get_value(route, params)
+        return value, params, permanent
 
     def _get_value(self, route, params):
         route = self._normalize_route(route)
         if route == '':
-            return self.value
+            return self.value, self.permanent
 
         head, tail = self._split_route(route)
 
         # Check for direct matches.
         child = self.children.get(head)
         if child:
-            value = child._get_value(tail, params)
+            value, permanent = child._get_value(tail, params)
             if value is not None:
-                return value
+                return value, permanent
 
         if self.param_child:
-            value = self.param_child.trie._get_value(tail, params)
+            value, permanent = self.param_child.trie._get_value(tail, params)
             if value is not None:
                 params[self.param_child.name] = head
-                return value
+                return value, permanent
 
         if self.wildcard_child:
             params[self.wildcard_child.name] = route
-            return self.wildcard_child.value
+            return self.wildcard_child.value, self.wildcard_child.permanent
 
-        return None
+        return None, None
 
     def _normalize_route(self, route):
         # Remove leading slashes.

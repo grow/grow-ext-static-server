@@ -50,7 +50,7 @@ class RedirectMiddleware(object):
       return self.redirect('/')
 
     # Handle user-supplied redirects.
-    redirect_uri = self.get_redirect_url(request.path)
+    redirect_uri, permanent = self.get_redirect_url(request.path)
     if redirect_uri:
       # Preserve query string for relative paths.
       if redirect_uri.startswith('/') and request.query_string:
@@ -67,7 +67,8 @@ class RedirectMiddleware(object):
           redirect_uri = '{}?{}'.format(redirect_uri, request.query_string)
 
       logging.info('redirecting from %s to %s', request.path_qs, redirect_uri)
-      return self.redirect(redirect_uri, code=302)
+      code = 301 if permanent else 302
+      return self.redirect(redirect_uri, code=code)
 
     # Render the WSGI response.
     return request.get_response(self.app)
@@ -89,18 +90,23 @@ class RedirectMiddleware(object):
   def init_redirects(self):
     """Initializes the redirects trie."""
     for parts in self.get_redirects():
-      path, url = parts
-      self.redirects.add(path, url)
+      if len(parts) == 2:
+        path, url = parts
+        permanent = False
+      elif len(parts) == 3:
+        path, url, permanent = parts
+      else:
+        raise ValueError('Malformed redirect -> {}'.format(parts))
+      self.redirects.add(path, url, permanent)
 
   def get_redirect_url(self, path):
     """Looks up a redirect URL from the redirects trie."""
-    url, params = self.redirects.get(path.lower())
+    url, params, permanent = self.redirects.get(path.lower())
     if not url:
-      return None
-
+      return None, None
     # Replace `$variable` placeholders in the URL.
     if '$' in url:
       for key, value in params.items():
         if key.startswith(':') or key.startswith('*'):
           url = url.replace('$' + key[1:], value)
-    return url
+    return url, permanent
