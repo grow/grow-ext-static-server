@@ -45,6 +45,11 @@ class TestEndpoints(unittest.TestCase):
         self.assertEqual(302, resp.status_int)
         self.assertEqual('http://localhost/subfolder/', resp.headers['Location'])
 
+        # Test permanent redirects.
+        resp = self.app.get('/foo')
+        self.assertEqual(301, resp.status_int)
+        self.assertEqual('http://localhost/bar', resp.headers['Location'])
+
 
 if __name__ == '__main__':
     unittest.main()
