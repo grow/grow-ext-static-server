@@ -9,3 +9,6 @@ settings:
   trailing_slash_behavior: add
   rewrite_localized_content: True
   custom_404_page: 404.html
+  supplemental_headers:
+    'Content-Security-Policy-Report-Only': "default-src https:; script-src 'nonce-{random}' 'unsafe-inline'; object-src 'none'; base-uri 'none'"
+    'X-Foo': 'Bar'

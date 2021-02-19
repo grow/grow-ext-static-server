@@ -24,6 +24,7 @@ trailing_slash_behavior = redirect_config.get('settings', {}).get('trailing_slas
 rewrite_content = redirect_config.get('settings', {}).get('rewrite_localized_content', False)
 custom_404_page = redirect_config.get('settings', {}).get('custom_404_page')
 localization = redirect_config.get('settings', {}).get('localization', {})
+supplemental_headers = redirect_config.get('settings', {}).get('supplemental_headers', {})
 
 mimetypes.add_type('text/template', '.mustache')
 mimetypes.add_type('application/xml', '.xml')
@@ -69,8 +70,11 @@ class StaticHandler(webapp2.RequestHandler):
           self.response.status = 304
           del self.response.headers['Content-Type']
           return
+      content_type = mimetypes.guess_type(path)[0] or 'text/plain'
       self.response.headers['ETag'] = str(etag)
-      self.response.headers['Content-Type'] = mimetypes.guess_type(path)[0] or 'text/plain'
+      self.response.headers['Content-Type'] = content_type
+      if supplemental_headers:
+        self.response.headers.update(supplemental_headers)
       # Bypass the subclass's `write` method due to Python 3 incompatibility.
       # https://github.com/GoogleCloudPlatform/webapp2/issues/146
       super(webapp2.Response, self.response).write(fp.read())

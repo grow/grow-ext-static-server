@@ -22,6 +22,7 @@ class TestEndpoints(unittest.TestCase):
         etag = StaticHandler.get_etag('test/build/index.html')
         self.assertEqual(etag, resp.headers['ETag'])
         self.assertIn('Hello World', resp.body.decode())
+        self.assertEqual('Bar', resp.headers['X-Foo'])
 
         resp = self.app.get('/', headers={'If-None-Match': etag})
         self.assertEqual(304, resp.status_int)
